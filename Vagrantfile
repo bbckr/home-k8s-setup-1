@@ -16,22 +16,22 @@ load $vagrantfilecommon
 
 Vagrant.configure(VAGRANT_CONFIGURATION_VERSION) do |config|
     nodes.each do |node_attr|
-        config.vm define node_attr[:name] do |config|
-            config.vm.hostname = node_attr[:name]
-            config.vm.box = node_attr[:name]
-            config.vm.box_version = node_attr[:box_version]
-            config.vm.network :private_network, ip: node_attr[:ip]
+        config.vm define node_attr['name'] do |config|
+            config.vm.hostname = node_attr['name']
+            config.vm.box = node_attr['box']
+            config.vm.box_version = node_attr['box_version']
+            config.vm.network :private_network, ip: node_attr['ip']
 
             config.vm.provider "virtualbox" do |box|
                 box.name = node_attr[:name]
-                box.customize ["modifyvm", :id, "--cpus", node_attr[:cpu]]
-                box.customize ["modifyvm", :id, "--memory", node_attr[:memory]]
+                box.customize ["modifyvm", :id, "--cpus", node_attr['cpu']]
+                box.customize ["modifyvm", :id, "--memory", node_attr['memory']]
             end
 
             config.vm.provision "shell", inline: $installDependencies
             config.vm.provision "shell", inline: $configurePostInstall
 
-            if node_attr[:master]
+            if node_attr['master']
                 config.vm.provision "shell", inline: $configureMaster
             else
                 config.vm.provision "shell", inline: $configureWorker

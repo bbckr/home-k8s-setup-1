@@ -1,23 +1,19 @@
-nodes:
-
-  - master: true
-    name: 'spc-master-node'
-    ip: '192.168.11.10'
-    box: 'centos/7'
-    box_version: '1905.1'
-    cpu: 2
-    memory: 4096
-
-  - name: 'spc-node-001'
-    ip: '192.168.11.11'
-    box: 'centos/7'
-    box_version: '1905.1'
-    cpu: 2
-    memory: 4096
-
-  - name: 'spc-node-002'
-    ip: '192.168.11.12'
-    box: 'centos/7'
-    box_version: '1905.1'
-    cpu: 2
-    memory: 4096
+- master: true
+  name: 'spc-master-node'
+  ip: '192.168.11.10'
+  box: 'centos/7'
+  box_version: '1905.1'
+  cpu: 2
+  memory: 4096
+- name: 'spc-node-001'
+  ip: '192.168.11.11'
+  box: 'centos/7'
+  box_version: '1905.1'
+  cpu: 2
+  memory: 4096
+- name: 'spc-node-002'
+  ip: '192.168.11.12'
+  box: 'centos/7'
+  box_version: '1905.1'
+  cpu: 2
+  memory: 4096
