@@ -55,7 +55,7 @@ swapoff -a
 sed -i '/swap/s/^/#/g' /etc/fstab
 
 HOST_IP="$(hostname -I | awk '{print $2}')"
-sed -i 's|KUBELET_EXTRA_ARGS=|KUBELET_EXTRA_ARGS=--node-ip=$HOST_IP --cni-bin-dir=/opt/cni/bin,/usr/libexec/cni |' /etc/default/kubelet
+sed -i 's|KUBELET_EXTRA_ARGS=|KUBELET_EXTRA_ARGS=--node-ip=$HOST_IP --cni-bin-dir=/opt/cni/bin,/usr/libexec/cni |' /etc/sysconfig/kubelet
 systemctl daemon-reload
 systemctl restart kubelet.service
 SCRIPT
@@ -92,4 +92,9 @@ kubeadm join \
     --discovery-token-unsafe-skip-ca-verification \
     --token "#{KUBETOKEN}" \
     "#{MASTER_IP}:6443"
+
+HOST_IP="$(hostname -I | awk '{print $2}')"
+sed -i 's|KUBELET_EXTRA_ARGS=|KUBELET_EXTRA_ARGS=--node-ip=$HOST_IP --cni-bin-dir=/opt/cni/bin,/usr/libexec/cni |' /etc/sysconfig/kubelet
+systemctl daemon-reload
+systemctl restart kubelet.service
 SCRIPT
