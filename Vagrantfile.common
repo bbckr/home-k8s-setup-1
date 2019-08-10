@@ -53,7 +53,7 @@ sudo echo '1' > /proc/sys/net/bridge/bridge-nf-call-iptables
 swapoff -a
 sed -i '/swap/s/^/#/g' /etc/fstab
 
-HOST_IP="$(hostname -I)"
+HOST_IP="$(hostname -I | awk '{print $2}')"
 sudo sed -i "/^[^#]*KUBELET_EXTRA_ARGS=/c\KUBELET_EXTRA_ARGS=--node-ip=$HOST_IP" /etc/default/kubelet
 sudo systemctl restart kubelet
 SCRIPT
@@ -62,7 +62,7 @@ $configureMaster = <<SCRIPT
 set -x
 kubeadm reset -f
 
-HOST_IP="$(hostname -I)"
+HOST_IP="$(hostname -I | awk '{print $2}')"
 HOST_NAME=$(hostname -s)
 kubeadm init \
     --apiserver-advertise-address=$HOST_IP \
