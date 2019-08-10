@@ -1,7 +1,6 @@
 # -*- mode: ruby -*-
 # # vi: set ft=ruby :
 
-Vagrant.require_version "==2.0.2"
 VAGRANT_CONFIGURATION_VERSION = "2"
 ENV["LC_ALL"] = "en_US.UTF-8"
 
