@@ -55,8 +55,9 @@ swapoff -a
 sed -i '/swap/s/^/#/g' /etc/fstab
 
 HOST_IP="$(hostname -I | awk '{print $2}')"
-sudo sed -i "/^[^#]*KUBELET_EXTRA_ARGS=/c\KUBELET_EXTRA_ARGS=--node-ip=$HOST_IP" /etc/default/kubelet
-sudo systemctl restart kubelet
+sed -i 's|KUBELET_EXTRA_ARGS=|KUBELET_EXTRA_ARGS=--node-ip=$HOST_IP --cni-bin-dir=/opt/cni/bin,/usr/libexec/cni |' /etc/default/kubelet
+systemctl daemon-reload
+systemctl restart kubelet.service
 SCRIPT
 
 $configureMaster = <<SCRIPT
