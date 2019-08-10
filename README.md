@@ -15,7 +15,7 @@ export KUBETOKEN="$(tr -cd 'a-z0-9' < /dev/urandom | fold -w 6 | head -n 1).$(tr
 vagrant up
 
 # tear down cluster
-vagrant destroy
+vagrant destroy [-f]
 
 # ssh into node
 vagrant ssh ${NODE_NAME}
