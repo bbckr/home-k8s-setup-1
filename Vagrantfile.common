@@ -30,9 +30,7 @@ cat > /etc/docker/daemon.json <<EOF
 }
 EOF
 mkdir -p /etc/systemd/system/docker.service.d
-
-systemctl daemon-reload
-systemctl restart docker
+systemctl enable --now docker.service
 ### end docker ###
 
 ### install kubeadm ###
@@ -98,7 +96,7 @@ chown $(id -u vagrant):$(id -g vagrant) /home/vagrant/.kube/config
 
 export KUBECONFIG=/etc/kubernetes/admin.conf
 kubectl apply -f \
-    https://docs.projectcalico.org/v2.0/getting-started/kubernetes/installation/hosted/kubeadm/calico.yaml
+    https://docs.projectcalico.org/v3.8/manifests/calico.yaml
 SCRIPT
 
 $configureWorker = <<SCRIPT
@@ -112,7 +110,7 @@ kubeadm join \
     "#{MASTER_IP}:6443"
 
 HOST_IP="$(hostname -I | awk '{print $2}')"
-sed -i 's|KUBELET_EXTRA_ARGS=|KUBELET_EXTRA_ARGS=--node-ip=$HOST_IP --cni-bin-dir=/opt/cni/bin,/usr/libexec/cni |' /etc/sysconfig/kubelet
+sed -i 's|KUBELET_EXTRA_ARGS=|KUBELET_EXTRA_ARGS=--node-ip=$HOST_IP --cni-bin-dir=/opt/cni/bin |' /etc/sysconfig/kubelet
 systemctl daemon-reload
 systemctl restart kubelet.service
 SCRIPT
