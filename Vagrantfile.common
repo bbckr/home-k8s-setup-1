@@ -73,10 +73,11 @@ kubeadm init \
     --token "#{KUBETOKEN}" \
     --token-ttl 0
 
-mkdir -p /home/vagrant/.kube
+sudo --user=vagrant mkdir -p /home/vagrant/.kube
 cp -Rf /etc/kubernetes/admin.conf /home/vagrant/.kube/config
-chown $(id -u):$(id -g) /home/vagrant/.kube/config
+chown $(id -u vagrant):$(id -g vagrant) /home/vagrant/.kube/config
 
+export KUBECONFIG=/etc/kubernetes/admin.conf
 kubectl apply -f \
     https://docs.projectcalico.org/v2.2/getting-started/kubernetes/installation/rbac.yaml
 kubectl apply -f \
