@@ -10,8 +10,8 @@ yum -y update && yum -y install \
 yum-config-manager --add-repo \
     https://download.docker.com/linux/centos/docker-ce.repo
 yum install -y \
-    docker-ce-17.03.0 \
-    docker-ce-cli-17.03.0 \
+    docker-ce-#{DOCKER_VERSION} \
+    docker-ce-cli-#{DOCKER_VERSION} \
     containerd.io
 usermod -aG docker vagrant
 ### end docker ###
