@@ -16,7 +16,7 @@ load $vagrantfilecommon
 
 Vagrant.configure(VAGRANT_CONFIGURATION_VERSION) do |config|
     nodes.each do |node_attr|
-        config.vm define node_attr['name'] do |config|
+        config.vm.define node_attr['name'] do |config|
             config.vm.hostname = node_attr['name']
             config.vm.box = node_attr['box']
             config.vm.box_version = node_attr['box_version']

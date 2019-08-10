@@ -43,7 +43,6 @@ yum install -y \
     --disableexcludes=kubernetes
 systemctl enable --now kubelet
 ### end kubeadm ###
-
 SCRIPT
 
 $configurePostInstall = <<SCRIPT
