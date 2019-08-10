@@ -14,6 +14,7 @@ yum install -y \
     docker-ce-cli-#{DOCKER_VERSION} \
     containerd.io
 usermod -aG docker vagrant
+systemctl start docker.service
 ### end docker ###
 
 ### install kubeadm ###
