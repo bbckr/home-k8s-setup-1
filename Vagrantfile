@@ -8,7 +8,7 @@ require 'yaml'
 
 nodes = YAML.load_file('nodes.yml')
 POD_CIDR = '192.168.0.0/16'
-KUBETOKEN = ENV['KUBETOKEN'] | 'vucsht.9vg5xomq3lvk0dgc'
+KUBETOKEN = ENV['KUBETOKEN'] || 'vucsht.9vg5xomq3lvk0dgc'
 MASTER_IP = nodes[0].ip
 
 $vagrantfilecommon = File.expand_path('./Vagrantfile.common', __FILE__)
