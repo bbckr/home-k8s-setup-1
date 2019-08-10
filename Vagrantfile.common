@@ -1,0 +1,116 @@
+$installDependencies = <<SCRIPT
+set -x
+yum -y update && yum -y install \
+    ca-certificates \
+    um-utils \
+    device-mapper-persistent-data \
+    lvm2
+
+### install docker ###
+yum-config-manager --add-repo \
+    https://download.docker.com/linux/centos/docker-ce.repo
+yum install -y \
+    docker-ce-#{DOCKER_VERSION} \
+    docker-ce-cli-#{DOCKER_VERSION} \
+    containerd.io
+usermod -aG docker vagrant
+
+mkdir /etc/docker
+cat > /etc/docker/daemon.json <<EOF
+{
+  "exec-opts": ["native.cgroupdriver=systemd"],
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "100m"
+  },
+  "storage-driver": "overlay2",
+  "storage-opts": [
+    "overlay2.override_kernel_check=true"
+  ]
+}
+EOF
+mkdir -p /etc/systemd/system/docker.service.d
+systemctl enable --now docker.service
+### end docker ###
+
+### install kubeadm ###
+lsmod | grep br_netfilter
+
+cat <<EOF >  /etc/sysctl.d/k8s.conf
+net.bridge.bridge-nf-call-ip6tables = 1
+net.bridge.bridge-nf-call-iptables = 1
+EOF
+sysctl --system
+
+cat <<EOF > /etc/yum.repos.d/kubernetes.repo
+[kubernetes]
+name=Kubernetes
+baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+EOF
+
+setenforce 0
+sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config
+yum install -y \
+    kubelet \
+    kubeadm \
+    kubectl \
+    --disableexcludes=kubernetes
+systemctl enable --now kubelet
+### end kubeadm ###
+SCRIPT
+
+$configurePostInstall = <<SCRIPT
+set -x
+sudo echo '1' > /proc/sys/net/bridge/bridge-nf-call-iptables
+
+swapoff -a
+sed -i '/swap/s/^/#/g' /etc/fstab
+
+HOST_IP="$(hostname -I | awk '{print $2}')"
+sed -i 's|KUBELET_EXTRA_ARGS=|KUBELET_EXTRA_ARGS=--node-ip=$HOST_IP --cni-bin-dir=/opt/cni/bin,/usr/libexec/cni |' /etc/sysconfig/kubelet
+systemctl daemon-reload
+systemctl restart kubelet.service
+SCRIPT
+
+$configureMaster = <<SCRIPT
+set -x
+kubeadm reset -f
+
+HOST_IP="$(hostname -I | awk '{print $2}')"
+HOST_NAME=$(hostname -s)
+kubeadm init \
+    --apiserver-advertise-address=$HOST_IP \
+    --apiserver-cert-extra-sans=$HOST_IP \
+    --node-name $HOST_NAME \
+    --pod-network-cidr=#{POD_CIDR} \
+    --token "#{KUBETOKEN}" \
+    --token-ttl 0
+
+sudo --user=vagrant mkdir -p /home/vagrant/.kube
+cp -Rf /etc/kubernetes/admin.conf /home/vagrant/.kube/config
+chown $(id -u vagrant):$(id -g vagrant) /home/vagrant/.kube/config
+
+export KUBECONFIG=/etc/kubernetes/admin.conf
+kubectl apply -f \
+    https://docs.projectcalico.org/v3.8/manifests/calico.yaml
+SCRIPT
+
+$configureWorker = <<SCRIPT
+set -x
+kubeadm reset -f
+
+kubeadm join \
+    --ignore-preflight-errors=SystemVerification \
+    --discovery-token-unsafe-skip-ca-verification \
+    --token "#{KUBETOKEN}" \
+    "#{MASTER_IP}:6443"
+
+HOST_IP="$(hostname -I | awk '{print $2}')"
+sed -i 's|KUBELET_EXTRA_ARGS=|KUBELET_EXTRA_ARGS=--node-ip=$HOST_IP --cni-bin-dir=/opt/cni/bin |' /etc/sysconfig/kubelet
+systemctl daemon-reload
+systemctl restart kubelet.service
+SCRIPT
