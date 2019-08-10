@@ -1,0 +1,92 @@
+$installDependencies = <<SCRIPT
+yum -y update && yum -y install \
+    ca-certificates \
+    um-utils \
+    device-mapper-persistent-data \
+    lvm2
+
+### install docker ###
+yum-config-manager --add-repo \
+    https://download.docker.com/linux/centos/docker-ce.repo
+yum install -y \
+    docker-ce-17.03.0 \
+    docker-ce-cli-17.03.0 \
+    containerd.io
+usermod -aG docker vagrant
+### end docker ###
+
+### install kubeadm ###
+lsmod | grep br_netfilter
+
+cat <<EOF >  /etc/sysctl.d/k8s.conf
+net.bridge.bridge-nf-call-ip6tables = 1
+net.bridge.bridge-nf-call-iptables = 1
+EOF
+sysctl --system
+
+cat <<EOF > /etc/yum.repos.d/kubernetes.repo
+[kubernetes]
+name=Kubernetes
+baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+EOF
+
+setenforce 0
+sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config
+yum install -y \
+    kubelet \
+    kubeadm \
+    kubectl \
+    --disableexcludes=kubernetes
+systemctl enable --now kubelet
+### end kubeadm ###
+
+SCRIPT
+
+$configurePostInstall = <<SCRIPT
+sudo echo '1' > /proc/sys/net/bridge/bridge-nf-call-iptables
+
+swapoff -a
+sed -i '/swap/s/^/#/g' /etc/fstab
+
+HOST_IP="$(hostname -I)"
+sudo sed -i "/^[^#]*KUBELET_EXTRA_ARGS=/c\KUBELET_EXTRA_ARGS=--node-ip=$HOST_IP" /etc/default/kubelet
+sudo systemctl restart kubelet
+SCRIPT
+
+$configureMaster = <<SCRIPT
+kubeadm reset -f
+
+HOST_IP="$(hostname -I)"
+HOST_NAME=$(hostname -s)
+kubeadm init \
+    --apiserver-advertise-address=$IP_ADDR \
+    --apiserver-cert-extra-sans=$HOST_IP \
+    --node-name $HOST_NAME \
+    --pod-network-cidr=#{POD_CIDR} \
+    --token "#{KUBETOKEN}" \
+    --token-ttl 0
+
+mkdir -p $HOME/.kube
+cp -Rf /etc/kubernetes/admin.conf $HOME/.kube/config
+chown $(id -u):$(id -g) $HOME/.kube/config
+
+kubectl apply -f \
+    https://docs.projectcalico.org/v2.2/getting-started/kubernetes/installation/rbac.yaml
+kubectl apply -f \
+    https://docs.projectcalico.org/v2.0/getting-started/kubernetes/installation/hosted/kubeadm/calico.yaml
+SCRIPT
+
+$configureWorker = <<SCRIPT
+kubeadm reset -f
+
+kubeadm join \
+    #{$kubeadm_join_flags} \
+    --ignore-preflight-errors=SystemVerification \
+    --discovery-token-unsafe-skip-ca-verification \
+    --token "#{KUBETOKEN}" \
+    "#{MASTER_IP}:6443"
+SCRIPT
