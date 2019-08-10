@@ -89,7 +89,6 @@ set -x
 kubeadm reset -f
 
 kubeadm join \
-    #{$kubeadm_join_flags} \
     --ignore-preflight-errors=SystemVerification \
     --discovery-token-unsafe-skip-ca-verification \
     --token "#{KUBETOKEN}" \
