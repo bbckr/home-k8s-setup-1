@@ -1,4 +1,5 @@
 $installDependencies = <<SCRIPT
+set -x
 yum -y update && yum -y install \
     ca-certificates \
     um-utils \
@@ -46,6 +47,7 @@ systemctl enable --now kubelet
 SCRIPT
 
 $configurePostInstall = <<SCRIPT
+set -x
 sudo echo '1' > /proc/sys/net/bridge/bridge-nf-call-iptables
 
 swapoff -a
@@ -57,6 +59,7 @@ sudo systemctl restart kubelet
 SCRIPT
 
 $configureMaster = <<SCRIPT
+set -x
 kubeadm reset -f
 
 HOST_IP="$(hostname -I)"
@@ -80,6 +83,7 @@ kubectl apply -f \
 SCRIPT
 
 $configureWorker = <<SCRIPT
+set -x
 kubeadm reset -f
 
 kubeadm join \
