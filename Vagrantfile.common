@@ -62,7 +62,7 @@ kubeadm reset -f
 HOST_IP="$(hostname -I)"
 HOST_NAME=$(hostname -s)
 kubeadm init \
-    --apiserver-advertise-address=$IP_ADDR \
+    --apiserver-advertise-address=$HOST_IP \
     --apiserver-cert-extra-sans=$HOST_IP \
     --node-name $HOST_NAME \
     --pod-network-cidr=#{POD_CIDR} \
