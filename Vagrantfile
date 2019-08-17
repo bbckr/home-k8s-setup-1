@@ -33,28 +33,10 @@ Vagrant.configure(VAGRANT_CONFIGURATION_VERSION) do |config|
                     node_attr['storage'].each do |storage_attr, index|
                         filename = "#{DEFAULT_STORAGE_PATH}/#{storage_attr['name']}"
                         if not File.exists?(filename)
-                            box.customize [
-                                "createmedium", storage_attr['type'],
-                                "--filename", filename,
-                                "--size", storage_attr['size'],
-                                "--format", storage_attr['format'],
-                                "--variant", storage_attr['variant']
-                                ]
+                            box.customize ["createmedium", storage_attr['type'], "--filename", filename, "--size", storage_attr['size'], "--format", storage_attr['format'], "--variant", storage_attr['variant']]
                         end
-                        box.customize [
-                            "storagectl", :id,
-                            "--name", "SATA Controller",
-                            "--add", "sata",
-                            "--portcount", node_attr['storage'].size
-                            ]
-                        box.customize [
-                            "storageattach", :id,
-                            "--storagectl", "SATA Controller",
-                            "--port", index,
-                            "--device", 0
-                            "--type", "hdd",
-                            "--medium", filename
-                            ]
+                        box.customize ["storagectl", :id, "--name", "SATA Controller", "--add", "sata", "--portcount", node_attr['storage'].size]
+                        box.customize ["storageattach", :id, "--storagectl", "SATA Controller", "--port", index, "--device", 0, "--type", "hdd", "--medium", filename]
                     end
                 end 
             end
