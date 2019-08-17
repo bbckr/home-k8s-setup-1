@@ -11,7 +11,7 @@ POD_CIDR = '192.168.0.0/16'
 KUBETOKEN = ENV['KUBETOKEN'] || 'vucsht.9vg5xomq3lvk0dgc'
 MASTER_IP = nodes[0]['ip']
 DOCKER_VERSION = '18.09.0'
-DEFAULT_STORAGE_PATH = '/var/lib/vdi'
+DEFAULT_STORAGE_PATH = '/var/lib/vdi/home-k8s-setup-1/'
 
 $vagrantfilecommon = File.expand_path('../Vagrantfile.common', __FILE__)
 load $vagrantfilecommon
