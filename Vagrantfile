@@ -11,6 +11,7 @@ POD_CIDR = '192.168.0.0/16'
 KUBETOKEN = ENV['KUBETOKEN'] || 'vucsht.9vg5xomq3lvk0dgc'
 MASTER_IP = nodes[0]['ip']
 DOCKER_VERSION = '18.09.0'
+DEFAULT_STORAGE_PATH = '/var/lib/vdi/home-k8s-setup-1/'
 
 $vagrantfilecommon = File.expand_path('../Vagrantfile.common', __FILE__)
 load $vagrantfilecommon
@@ -27,6 +28,17 @@ Vagrant.configure(VAGRANT_CONFIGURATION_VERSION) do |config|
                 box.name = node_attr[:name]
                 box.customize ["modifyvm", :id, "--cpus", node_attr['cpu']]
                 box.customize ["modifyvm", :id, "--memory", node_attr['memory']]
+
+                if node_attr['storage']
+                    box.customize ["storagectl", :id, "--name", "SATA Controller", "--add", "sata", "--portcount", node_attr['storage'].size]
+                    node_attr['storage'].each_with_index do |storage_attr, index|
+                        filename = "#{DEFAULT_STORAGE_PATH}/#{storage_attr['name']}"
+                        if not File.exists?(filename)
+                            box.customize ["createmedium", storage_attr['type'], "--filename", filename, "--size", storage_attr['size'], "--format", storage_attr['format'], "--variant", storage_attr['variant']]
+                        end
+                        box.customize ["storageattach", :id, "--storagectl", "SATA Controller", "--port", index, "--device", 0, "--type", "hdd", "--medium", filename]
+                    end
+                end 
             end
 
             config.vm.provision "shell", inline: $installDependencies
