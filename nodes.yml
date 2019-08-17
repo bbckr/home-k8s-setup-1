@@ -11,9 +11,26 @@
   box_version: '1905.1'
   cpu: 2
   memory: 4096
+  storage:
+    - name: spc_node_001_001.vdi
+      type: disk
+      format: VDI
+      size: 153600
+      variant: Fixed
+    - name: spc_node_001_002.vdi
+      type: disk
+      format: VDI
+      size: 51200
+      variant: Fixed
 - name: 'spc-node-002'
   ip: '192.168.11.12'
   box: 'centos/7'
   box_version: '1905.1'
   cpu: 2
   memory: 4096
+  storage:
+    - name: spc_node_002_001.vdi
+      type: disk
+      format: VDI
+      size: 153600
+      variant: Fixed
