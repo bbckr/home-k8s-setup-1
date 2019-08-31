@@ -51,6 +51,10 @@ Vagrant.configure(VAGRANT_CONFIGURATION_VERSION) do |config|
             else
                 config.vm.provision "shell", inline: $configureWorker
             end
+
+            box.trigger.after :destroy, :halt do |trigger|
+                trigger.run = {inline: "rm -R -- #{DEFAULT_STORAGE_PATH}/"}
+            end
         end
     end
 end
