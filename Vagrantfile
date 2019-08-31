@@ -30,7 +30,11 @@ Vagrant.configure(VAGRANT_CONFIGURATION_VERSION) do |config|
                 box.customize ["modifyvm", :id, "--memory", node_attr['memory']]
 
                 if node_attr['storage']
-                    box.customize ["storagectl", :id, "--name", "SATA Controller", "--add", "sata", "--portcount", node_attr['storage'].size]
+                    begin
+                        box.customize ["storagectl", :id, "--name", "SATA Controller", "--add", "sata", "--portcount", node_attr['storage'].size]
+                    rescue
+                        puts "Storage Controller already exists."
+                    end
                     node_attr['storage'].each_with_index do |storage_attr, index|
                         filename = "#{DEFAULT_STORAGE_PATH}/#{storage_attr['name']}"
                         if not File.exists?(filename)
