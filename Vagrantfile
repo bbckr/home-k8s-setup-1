@@ -30,7 +30,7 @@ Vagrant.configure(VAGRANT_CONFIGURATION_VERSION) do |config|
                 box.customize ["modifyvm", :id, "--memory", node_attr['memory']]
 
                 if node_attr['storage']
-                    if not File.directory?(DEFAULT_STORAGE_PATH/node_attr['name'])
+                    if not File.directory?("#{DEFAULT_STORAGE_PATH}/#{node_attr['name']}")
                         box.customize ["storagectl", :id, "--name", "SATA Controller", "--add", "sata", "--portcount", node_attr['storage'].size]
                     end
                     node_attr['storage'].each_with_index do |storage_attr, index|
@@ -50,6 +50,10 @@ Vagrant.configure(VAGRANT_CONFIGURATION_VERSION) do |config|
                 config.vm.provision "shell", inline: $configureMaster
             else
                 config.vm.provision "shell", inline: $configureWorker
+            end
+
+            config.trigger.after :destroy do |trigger|
+                trigger.run = { inline: "rm -rf #{DEFAULT_STORAGE_PATH}/*" }
             end
         end
     end
