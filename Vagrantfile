@@ -53,7 +53,7 @@ Vagrant.configure(VAGRANT_CONFIGURATION_VERSION) do |config|
             end
 
             node_config.trigger.after :destroy do |trigger|
-                trigger.run = { inline: "rm -rf #{DEFAULT_STORAGE_PATH}/*" }
+                trigger.run = { inline: "rm -rf #{DEFAULT_STORAGE_PATH}/#{node_attr['name']}" }
             end
         end
     end
