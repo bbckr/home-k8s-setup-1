@@ -43,7 +43,7 @@ Vagrant.configure(VAGRANT_CONFIGURATION_VERSION) do |config|
                 end 
 
                 box.trigger.after :destroy, :halt do |trigger|
-                    trigger.run = {inline: "rm -R -- #{DEFAULT_STORAGE_PATH}/*"}
+                    trigger.run = {inline: "rm -rf #{DEFAULT_STORAGE_PATH}/*"}
                 end
             end
 
