@@ -18,13 +18,13 @@ load $vagrantfilecommon
 
 Vagrant.configure(VAGRANT_CONFIGURATION_VERSION) do |config|
     nodes.each do |node_attr|
-        config.vm.define node_attr['name'] do |config|
-            config.vm.hostname = node_attr['name']
-            config.vm.box = node_attr['box']
-            config.vm.box_version = node_attr['box_version']
-            config.vm.network :private_network, ip: node_attr['ip']
+        config.vm.define node_attr['name'] do |node_config|
+            node_config.vm.hostname = node_attr['name']
+            node_config.vm.box = node_attr['box']
+            node_config.vm.box_version = node_attr['box_version']
+            node_config.vm.network :private_network, ip: node_attr['ip']
 
-            config.vm.provider "virtualbox" do |box|
+            node_config.vm.provider "virtualbox" do |box|
                 box.name = node_attr[:name]
                 box.customize ["modifyvm", :id, "--cpus", node_attr['cpu']]
                 box.customize ["modifyvm", :id, "--memory", node_attr['memory']]
@@ -43,16 +43,16 @@ Vagrant.configure(VAGRANT_CONFIGURATION_VERSION) do |config|
                 end 
             end
 
-            config.vm.provision "shell", inline: $installDependencies
-            config.vm.provision "shell", inline: $configurePostInstall
+            node_config.vm.provision "shell", inline: $installDependencies
+            node_config.vm.provision "shell", inline: $configurePostInstall
 
             if node_attr['master']
-                config.vm.provision "shell", inline: $configureMaster
+                node_config.vm.provision "shell", inline: $configureMaster
             else
-                config.vm.provision "shell", inline: $configureWorker
+                node_config.vm.provision "shell", inline: $configureWorker
             end
 
-            config.trigger.after :destroy do |trigger|
+            node_config.trigger.after :destroy do |trigger|
                 trigger.run = { inline: "rm -rf #{DEFAULT_STORAGE_PATH}/*" }
             end
         end
