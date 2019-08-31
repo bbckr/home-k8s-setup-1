@@ -41,6 +41,10 @@ Vagrant.configure(VAGRANT_CONFIGURATION_VERSION) do |config|
                         box.customize ["storageattach", :id, "--storagectl", "SATA Controller", "--port", index, "--device", 0, "--type", "hdd", "--medium", filename]
                     end
                 end 
+
+                box.trigger.after :destroy, :halt do |trigger|
+                    trigger.run = {inline: "rm -R -- #{DEFAULT_STORAGE_PATH}/"}
+                end
             end
 
             config.vm.provision "shell", inline: $installDependencies
@@ -50,10 +54,6 @@ Vagrant.configure(VAGRANT_CONFIGURATION_VERSION) do |config|
                 config.vm.provision "shell", inline: $configureMaster
             else
                 config.vm.provision "shell", inline: $configureWorker
-            end
-
-            box.trigger.after :destroy, :halt do |trigger|
-                trigger.run = {inline: "rm -R -- #{DEFAULT_STORAGE_PATH}/"}
             end
         end
     end
