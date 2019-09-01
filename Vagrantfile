@@ -17,7 +17,7 @@ $vagrantfilecommon = File.expand_path('../Vagrantfile.common', __FILE__)
 load $vagrantfilecommon
 
 Vagrant.configure(VAGRANT_CONFIGURATION_VERSION) do |config|
-    nodes.each do |node_attr|
+    nodes.each_with_index do |node_attr, node_index|
         config.vm.define node_attr['name'] do |node_config|
             node_config.vm.hostname = node_attr['name']
             node_config.vm.box = node_attr['box']
@@ -53,7 +53,7 @@ Vagrant.configure(VAGRANT_CONFIGURATION_VERSION) do |config|
             end
 
             node_config.trigger.after :destroy do |trigger|
-                trigger.run = { inline: "rm -rf #{DEFAULT_STORAGE_PATH}/#{node_attr[:name]}" }
+                trigger.run = { inline: "rm -rf #{DEFAULT_STORAGE_PATH}/#{nodes[node_index]['name']}" }
             end
         end
     end
