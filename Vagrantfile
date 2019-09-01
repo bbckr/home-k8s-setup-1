@@ -31,7 +31,6 @@ Vagrant.configure(VAGRANT_CONFIGURATION_VERSION) do |config|
 
                 if node_attr['storage']
                     if not File.directory?("#{DEFAULT_STORAGE_PATH}/#{node_attr['name']}")
-                        Dir.mkdir "#{DEFAULT_STORAGE_PATH}/#{node_attr['name']}"
                         box.customize ["storagectl", :id, "--name", "SATA Controller", "--add", "sata", "--portcount", node_attr['storage'].size]
                     end
                     node_attr['storage'].each_with_index do |storage_attr, index|
