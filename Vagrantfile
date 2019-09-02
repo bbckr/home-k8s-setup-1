@@ -43,6 +43,8 @@ Vagrant.configure(VAGRANT_CONFIGURATION_VERSION) do |config|
                 end 
             end
 
+            node_config.vm.provision "file", source: "~/.ssh/id_rsa.pub", destination: "/tmp/authorized_keys"
+
             node_config.vm.provision "shell", inline: $installDependencies
             node_config.vm.provision "shell", inline: $configurePostInstall
 

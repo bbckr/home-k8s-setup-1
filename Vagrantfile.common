@@ -67,6 +67,11 @@ $configurePostInstall = <<SCRIPT
 set -x
 sudo echo '1' > /proc/sys/net/bridge/bridge-nf-call-iptables
 
+mkdir -m 700 ~/.ssh
+mv /tmp/authorized_keys ~/.ssh/authorized_keys
+chmod 600 ~/.ssh/authorized_keys
+chown root:root ~/.ssh/authorized_keys
+
 swapoff -a
 sed -i '/swap/s/^/#/g' /etc/fstab
 
